@@ -8,7 +8,8 @@ const char* password = "inter1017net";
 const char* usr = "dev2";
 const char* pwd = "dev2dev2";
 
-unsigned long lustRun;
+unsigned long lastRun;
+float setTemp;
 
 #define DHTPIN 14
 
@@ -39,15 +40,14 @@ void setup() {
 
 void setDefaultPortValues() {
   digitalWrite(12, 1);
-  digitalWrite(13, 0);
+  digitalWrite(13, 1);
 }
 
 void loop() {
+   delay(2000);
   
-  if(millis() - lustRun > 5000) {
-    lustRun = millis();
     float t = dht.readTemperature();
-    Serial.printf("t=%d\n", t);
+    Serial.println("t=" + String(t));
   
     if (isnan(t)) {
       Serial.println("Failed to read from DHT sensor!");
@@ -59,8 +59,11 @@ void loop() {
   
       HTTPClient http;
       Serial.println("[HTTP] start...");
-      String url = "http://iot.lyolek.dp.ua/services/device.php?GPIO14=";
-      url += t;
+      String url = "http://iot.lyolek.dp.ua/services/device.php?";
+      url += "GPIO14=" + String(t) + "&";
+      url += "GPIO100=" + String(digitalRead(12)) + "&";
+      url += "GPIO101=" + String(setTemp);
+      Serial.println(url);
       http.begin(url);
       http.setAuthorization(usr, pwd);
   
@@ -79,17 +82,17 @@ void loop() {
           delay(5000);
           return;
         }
-        float GPIO12 = parsed["GPIO12"];
-        Serial.printf("GPIO12=%d\n", GPIO12);
+        setTemp = parsed["GPIO12"];
+        Serial.printf("GPIO12=%d\n", setTemp);
   
-        if(t < (GPIO12 - 0.5)) {
+        if(t < (setTemp - 0.5)) {
           digitalWrite(12, 1);
           Serial.println("Set ON");
-        } else if(t > (GPIO12 + 0.5)) {
+        } else if(t > (setTemp + 0.5)) {
           digitalWrite(12, 0);
           Serial.println("Set OFF");
         }
-        digitalWrite(13, 1);
+        digitalWrite(13, 0);
       } else {
           Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
           setDefaultPortValues();
@@ -98,7 +101,11 @@ void loop() {
     } else {
       setDefaultPortValues();
     }
+
     
+  while(millis() - lastRun < 10000) {
+    delay(500);
   }
+  lastRun = millis();
 
 }
