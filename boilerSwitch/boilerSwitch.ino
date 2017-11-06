@@ -5,8 +5,8 @@
 
 const char* ssid = "Mega";
 const char* password = "inter1017net";
-const char* usr = "dev2";
-const char* pwd = "dev2dev2";
+const char* usr = "dev1";
+const char* pwd = "dev1dev1";
 
 void setup() {
   Serial.begin(115200);
@@ -23,15 +23,14 @@ void setup() {
 
 
   
-  pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
-  pinMode(14, INPUT_PULLUP);
+  pinMode(12, OUTPUT);//blue Led + relay
+  pinMode(13, OUTPUT);//green led (inverse)
   setDefaultPortValues();
 }
 
 void setDefaultPortValues() {
   digitalWrite(12, 0);
-  digitalWrite(13, 0);
+  digitalWrite(13, 1);
 }
 
 void loop() {
@@ -41,8 +40,7 @@ void loop() {
 
     HTTPClient http;
     Serial.println("[HTTP] start...");
-    String url = "http://iot.lyolek.dp.ua/services/device.php?GPIO14=";
-    url += digitalRead(14);
+    String url = "http://iot.lyolek.dp.ua/services/device.php";
     http.begin(url);
     http.setAuthorization(usr, pwd);
 
@@ -62,14 +60,11 @@ void loop() {
         return;
       }
       int GPIO12 = parsed["GPIO12"];
-//      int GPIO13 = parsed["GPIO13"];
       Serial.printf("GPIO12=%d\n", GPIO12);
-//      Serial.printf("GPIO13=%d\n", GPIO13);
-//      Serial.printf("GPIO14=%d\n", digitalRead(14));
 
       
       digitalWrite(12, GPIO12);
-      digitalWrite(13, GPIO12);
+      digitalWrite(13, 0);
     } else {
         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
         setDefaultPortValues();
