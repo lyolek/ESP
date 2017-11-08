@@ -7,6 +7,7 @@ const char* ssid = "Mega";
 const char* password = "inter1017net";
 const char* usr = "dev1";
 const char* pwd = "dev1dev1";
+boolean buttonPressed = false;
 
 void setup() {
   Serial.begin(115200);
@@ -25,16 +26,28 @@ void setup() {
   
   pinMode(12, OUTPUT);//blue Led + relay
   pinMode(13, OUTPUT);//green led (inverse)
+  pinMode(0, INPUT_PULLUP);//button
   setDefaultPortValues();
+
+  attachInterrupt(0, buttonPress, FALLING);
+  sei();
 }
 
 void setDefaultPortValues() {
-  digitalWrite(12, 0);
   digitalWrite(13, 1);
 }
 
+void buttonPress () {
+  buttonPressed = true;
+} 
+
 void loop() {
 
+  Serial.println(buttonPressed);
+  if(buttonPressed == 1) {
+    digitalWrite(12, digitalRead(12) == 0 ? 1 : 0);
+    buttonPressed = false;
+  }
   // wait for WiFi connection
   if((WiFi.status() == WL_CONNECTED)) {
 
