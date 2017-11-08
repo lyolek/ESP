@@ -9,7 +9,8 @@ const char* usr = "dev2";
 const char* pwd = "dev2dev2";
 
 unsigned long lastRun;
-float setTemp;
+float setTemp = 10;
+float currTemp = setTemp;
 
 #define DHTPIN 14
 
@@ -39,17 +40,27 @@ void setup() {
 }
 
 void setDefaultPortValues() {
-  digitalWrite(12, 1);
+  setRelay();
   digitalWrite(13, 1);
+}
+
+void setRelay() {
+  if(currTemp < (setTemp - 0.3)) {
+    digitalWrite(12, 1);
+    Serial.println("Set ON");
+  } else if(currTemp > (setTemp + 0.3)) {
+    digitalWrite(12, 0);
+    Serial.println("Set OFF");
+  }
 }
 
 void loop() {
    delay(2000);
   
-    float t = dht.readTemperature();
-    Serial.println("t=" + String(t));
+    currTemp = dht.readTemperature();
+    Serial.println("currTemp=" + String(currTemp));
   
-    if (isnan(t)) {
+    if (isnan(currTemp)) {
       Serial.println("Failed to read from DHT sensor!");
       return;
     }
@@ -60,8 +71,7 @@ void loop() {
       HTTPClient http;
       Serial.println("[HTTP] start...");
       String url = "http://iot.lyolek.dp.ua/services/device.php?";
-      url += "GPIO14=" + String(t) + "&";
-      url += "GPIO100=" + String(digitalRead(12)) + "&";
+      url += "GPIO14=" + String(currTemp) + "&";
       url += "GPIO101=" + String(setTemp);
       Serial.println(url);
       http.begin(url);
@@ -79,19 +89,12 @@ void loop() {
         if (!parsed.success()) {   //Check for errors in parsing
   
           Serial.println("Parsing failed");
-          delay(5000);
+          setDefaultPortValues();
           return;
         }
         setTemp = parsed["GPIO12"];
         Serial.printf("GPIO12=%d\n", setTemp);
-  
-        if(t < (setTemp - 0.5)) {
-          digitalWrite(12, 1);
-          Serial.println("Set ON");
-        } else if(t > (setTemp + 0.5)) {
-          digitalWrite(12, 0);
-          Serial.println("Set OFF");
-        }
+        setRelay();
         digitalWrite(13, 0);
       } else {
           Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
