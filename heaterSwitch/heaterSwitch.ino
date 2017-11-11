@@ -72,7 +72,7 @@ void loop() {
       Serial.println("[HTTP] start...");
       String url = "http://iot.lyolek.dp.ua/services/device.php?";
       url += "GPIO14=" + String(currTemp) + "&";
-      url += "GPIO101=" + String(setTemp);
+      url += "GPIO100=" + String(digitalRead(12));
       Serial.println(url);
       http.begin(url);
       http.setAuthorization(usr, pwd);
