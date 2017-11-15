@@ -5,8 +5,8 @@
 
 const char* ssid = "Mega";
 const char* password = "inter1017net";
-const char* usr = "dev3";
-const char* pwd = "dev3dev3";
+const char* usr = "dev4";
+const char* pwd = "dev4dev4";
 int currentValweState = -1;
 
 void setup() {
@@ -35,25 +35,13 @@ void setup() {
 }
 
 void valweSet(int state) {
-  
   Serial.printf("valweSet(%d)\n", state);
   Serial.printf("currentValweState =  %d \n", currentValweState);
-//  if(currentValweState != state) {
-/*
-    Serial.write(0xA0);
-    Serial.write(0x04);
-    Serial.write(0x00); 
-    Serial.write(0xA1);
-    Serial.flush();
-*/  
-    
-    Serial.write(0xA0);
-    Serial.write(0x04);
-    Serial.write(state == 1 ? 0x06 : 0x05);
-    Serial.write(0xA1);
-    Serial.flush();
-//  }
-//  currentValweState = state;
+  Serial.write(0xA0);
+  Serial.write(0x04);
+  Serial.write(state == 1 ? 0x06 : 0x05);
+  Serial.write(0xA1);
+  Serial.flush();
 }
 
 void loop() {
