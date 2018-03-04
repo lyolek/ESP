@@ -4,8 +4,8 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "Mega";
-const char* password = "inter1017net";
+const char* ssid = "TP-LINK-158";
+const char* password = "inter158net";
 const char* usr = "dev3";
 const char* pwd = "dev3dev3";
 
