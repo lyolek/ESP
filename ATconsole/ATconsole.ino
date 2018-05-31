@@ -1,10 +1,10 @@
 #include <SoftwareSerial.h>
  
 //SIM800 TX is connected to Arduino D8
-#define SIM800_TX_PIN 15
+#define SIM800_TX_PIN 4
  
 //SIM800 RX is connected to Arduino D7
-#define SIM800_RX_PIN 2
+#define SIM800_RX_PIN 5
 
 SoftwareSerial serialSIM800(SIM800_TX_PIN,SIM800_RX_PIN);
 

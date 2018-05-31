@@ -47,35 +47,37 @@ const char* pwd = "dev4dev4";
 
 void setup() {
   // Set console baud rate
-  Serial.begin(19200);
+  Serial.begin(115200);
   delay(10);
 
   // Set GSM module baud rate
   
   Serial.println("Initializing modem...");
-  SerialAT.begin(19200);
+  SerialAT.begin(115200);
   delay(3000);
+
+
+//  pinMode(13, OUTPUT);
+//  pinMode(12, INPUT_PULLUP);
+  setDefaultPortValues();
+}
+
+void setDefaultPortValues() {
+//  digitalWrite(13, 0);
+}
+
+void loop() {
 
   // Restart takes quite some time
   // To skip it, call init() instead of restart()
   Serial.println("Initializing modem...");
-  modem.init();
+  modem.restart();
 
   String modemInfo = modem.getModemInfo();
   Serial.print("Modem: ");
   Serial.println(modemInfo);
 
-
-  pinMode(13, OUTPUT);
-  pinMode(12, INPUT_PULLUP);
-  setDefaultPortValues();
-}
-
-void setDefaultPortValues() {
-  digitalWrite(13, 0);
-}
-
-void loop() {
+  
   Serial.print(F("Waiting for network..."));
   if (!modem.waitForNetwork()) {
     Serial.println(" fail");
@@ -93,7 +95,7 @@ void loop() {
   }
   Serial.println(" OK");
 
-  
+/*
   HTTPClient http;
   Serial.println("[HTTP] start...");
   String url = "http://iot.lyolek.dp.ua/services/device.php?GPIO12=";
@@ -127,7 +129,7 @@ void loop() {
     }
     http.end();
 
-
+*/
   modem.gprsDisconnect();
   Serial.println("GPRS disconnected");
 
