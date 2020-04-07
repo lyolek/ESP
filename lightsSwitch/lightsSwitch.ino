@@ -1,10 +1,13 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>
 
 
-const char* ssid = "Mega";
-const char* password = "inter1017net";
+const char* ssid = "TP-LINK-158";
+const char* password = "inter158net";
 const char* usr = "dev6";
 const char* pwd = "dev6dev6";
 unsigned long button1Last;
@@ -33,8 +36,6 @@ void setup() {
 
   WiFi.begin(ssid, password);
   WiFi.mode(WIFI_STA);
-  String hostName = "esp8266:";
-  hostName += usr;
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
@@ -47,11 +48,17 @@ void setup() {
   attachInterrupt(button1, button1Press, FALLING);
   attachInterrupt(button2, button2Press, FALLING);
   sei();
+
+  ArduinoOTA.setPort(8266);
+  String hostName = "esp8266:";
+  hostName += usr;
+  ArduinoOTA.setHostname(hostName.c_str());
+  ArduinoOTA.begin();
 }
 
 void setDefaultPortValues() {
-  digitalWrite(relay1, 0);
-  digitalWrite(relay2, 0);
+//  digitalWrite(relay1, 0);
+//  digitalWrite(relay2, 0);
   digitalWrite(ledNet, 1);
 }
 
@@ -70,15 +77,15 @@ void button2Press () {
 }
 
 void loop() {
+  ArduinoOTA.handle();
   currentTime = millis();
-  if(currentTime < (prewTime + 5000)) {
+  if(currentTime < (prewTime + 10000)) {
     return;
   }
   prewTime = currentTime;
   // wait for WiFi connection
   if((WiFi.status() == WL_CONNECTED)) {
 
-    
     digitalWrite(ledNet, digitalRead(ledNet) == 1 ? 0 : 1);
     delay(100);
     digitalWrite(ledNet, digitalRead(ledNet) == 1 ? 0 : 1);
@@ -116,10 +123,10 @@ void loop() {
       int relay2State = parsed["GPIO05"];
       Serial.printf("relay2State=%d\n", relay2State);
       
-      if(currentTime - button1Last > 30*60*1000 || button1Last == 0) {
+      if(currentTime - button1Last > 10*60*1000 || button1Last == 0) {
         digitalWrite(relay1, relay1State);
       }
-      if(currentTime - button2Last > 30*60*1000 || button2Last == 0) {
+      if(currentTime - button2Last > 10*60*1000 || button2Last == 0) {
         digitalWrite(relay2, relay2State);
       }
       digitalWrite(ledNet, 0);

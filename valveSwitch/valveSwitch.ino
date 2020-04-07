@@ -1,6 +1,9 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 
 
 const char* ssid = "TP-LINK-158";
@@ -50,6 +53,14 @@ Serial.println("setup");
     
   currentTime = millis();
   prewTime = currentTime;
+
+  
+
+  ArduinoOTA.setPort(8266);
+  String hostName = "esp8266:";
+  hostName += usr;
+  ArduinoOTA.setHostname(hostName.c_str());
+  ArduinoOTA.begin();
 }
 
 
@@ -90,6 +101,8 @@ Serial.println("go");
 }
 
 void loop() {
+  ArduinoOTA.handle();
+  
   currentTime = millis();
   if(currentTime < (prewTime + 10000)) {
     return;

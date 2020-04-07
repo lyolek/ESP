@@ -1,27 +1,90 @@
 #include <SoftwareSerial.h>
-SoftwareSerial GSMport(5, 4); // RX, TX
-int char_;
+SoftwareSerial GSMport(3, 2); // RX, TX
 
 void setup() {
-  pinMode(14, OUTPUT);
-  pinMode(12, INPUT_PULLUP);
+  //Begin serial comunication with Arduino and Arduino IDE (Serial Monitor)
+  Serial.begin(9600);
+  while(!Serial);
+   
+  //Being serial communication witj Arduino and SIM800
   
-  delay(3000); //дадим время на инициализацию GSM модулю
-  Serial.begin(9600);  //скорость порта
-  Serial.println("GPRS test");
   GSMport.begin(9600);
-  gprs_init();
+  delay(1000);
+   
+  Serial.println("Setup Complete!");
+
+  sendAT("AT");
+  sendAT("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"");
+  sendAT("AT+SAPBR=3,1,\"APN\",\"www.ab.kyivstar.net\"");
+  sendAT("AT+SAPBR=3,1,\"USER\",\"\"");
+  sendAT("AT+SAPBR=3,1,\"PWD\",\"\"");
+
 }
 
 void loop() {
-  gprs_send(String(digitalRead(12)));
+  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
   delay(100);
-  if (GSMport.available()) {  //если GSM модуль что-то послал нам, то
-    Serial.println(ReadGSM());  //печатаем в монитор порта пришедшую строку
-  }
+  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
   delay(100);
+  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);   
+  Serial.println("loop()");
+  sendAT("AT+SAPBR=1,1");
+  sendAT("AT+HTTPINIT");
+  sendAT("AT+HTTPPARA=\"CID\",1");
+  sendAT("AT+HTTPPARA=\"URL\",\"http://iot.lyolek.dp.ua/services/device.php?GPIO140=1\"");
+  sendAT("AT+HTTPPARA=\"USERDATA\",\"Authorization: Basic ZGV2NDpkZXY0ZGV2NAA=\"");
+  sendAT("AT+HTTPACTION=0");
+  delay(5000);
+  sendAT("AT+HTTPREAD");
+  sendAT("AT+HTTPTERM");
+  sendAT("AT+SAPBR=0,1");
+  
+  delay(600000);
 }
 
+
+String sendAT(String cmd) {
+  return sendAT(cmd, "OK");
+}
+String sendAT(String cmd, String resp) {
+  unsigned long startTime;
+  startTime = millis();
+  Serial.println(cmd);
+  GSMport.println(cmd);
+  String s;
+  do {
+    s = readATString();
+    if(s.length() >0) {
+      Serial.println("->" + s);
+    }
+    Serial.print(".");
+  } while(!s.equals(resp) && !s.equals("ERROR") && millis() - startTime < 10000);
+  Serial.println("finAT");
+  return "";
+}
+
+String readATString(){
+    int c;
+    String v;
+    while (true) {  //сохраняем входную строку в переменную v
+      if(GSMport.available()){
+        c = GSMport.read();
+//        Serial.println(c);
+        if(c == 13 || c == 10){
+          return v;
+        }
+        v += char(c);
+      }
+    }
+}
+/*
 void gprs_init() {  //Процедура начальной инициализации GSM модуля
   int d = 500;
   int ATsCount = 7;
@@ -51,7 +114,7 @@ void gprs_send(String data) {  //Процедура отправки данны�
   int d = 400;
   Serial.println("Send start");
   Serial.println("setup url");
-  GSMport.println("AT+HTTPPARA=\"URL\",\"http://iot.lyolek.dp.ua/services/device.php?GPIO12=" + data + "\"");
+  GSMport.println("AT+HTTPPARA=\"URL\",\"http://www.google.com\"");
   delay(d * 2);
   Serial.println(ReadGSM());
   delay(d);
@@ -62,14 +125,5 @@ void gprs_send(String data) {  //Процедура отправки данны�
   delay(d);
   Serial.println("Send done");
 }
+*/
 
-String ReadGSM() {  //функция чтения данных от GSM модуля
-  int c;
-  String v;
-  while (GSMport.available()) {  //сохраняем входную строку в переменную v
-    c = GSMport.read();
-    v += char(c);
-    delay(10);
-  }
-  return v;
-}

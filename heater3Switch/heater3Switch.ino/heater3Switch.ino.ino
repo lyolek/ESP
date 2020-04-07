@@ -9,29 +9,24 @@
 
 const char* ssid = "TP-LINK-158";
 const char* password = "inter158net";
-const char* usr = "dev3";
-const char* pwd = "dev3dev3";
+const char* usr = "dev10";
+const char* pwd = "dev10dev10";
 
 unsigned long currentTime;
 unsigned long prewTime;
 unsigned long lastSwitch;
 float setTemp = 10;
 float currAirTemp = setTemp;
-float currFlorTemp = setTemp;
 
 
-#define ledPin 13
+#define ledPin 15
 #define relayPin 12
 
-#define ONE_WIRE_BUS 14
+#define ONE_WIRE_BUS 2
 
 OneWire oneWire(ONE_WIRE_BUS);
-DeviceAddress florThermometer = {0x28, 0xFF, 0x69, 0xE1, 0x02, 0x17, 0x03, 0x43};//пол 28 FF 69 E1 02 17 03 43
-DeviceAddress airThermometer = {0x28, 0xFF, 0xF4, 0x35, 0xA1, 0x16, 0x04, 0x42};//воздух 28 FF F4 35 A1 16 04 42
+DeviceAddress airThermometer = {0x28, 0xFF, 0x96, 0x1B, 0x01, 0x17, 0x04, 0x87};//воздух
 //ROM = 28 FF 96 1B 1 17 4 87
-//ROM = 28 FF 5F 31 C1 16 4 AA
-//DeviceAddress florThermometer = {0x28, 0xFF, 0x96, 0x1B, 0x01, 0x17, 0x04, 0x87};//пол
-//DeviceAddress airThermometer  = {0x28, 0xFF, 0x5F, 0x31, 0xC1, 0x16, 0x04, 0xAA};//воздух
 
 
 DallasTemperature sensors(&oneWire);
@@ -48,7 +43,6 @@ void setup() {
 
   sensors.begin();
   sensors.setResolution(airThermometer, 12);
-  sensors.setResolution(florThermometer, 12);
   
   pinMode(relayPin, OUTPUT);//RELAY+LED RED
   pinMode(ledPin, OUTPUT);//LED BLUE
@@ -63,7 +57,7 @@ void setup() {
 
 void setDefaultPortValues() {
   setRelay();
-  digitalWrite(ledPin, 1);
+  digitalWrite(ledPin, 0);
 }
 
 void setRelay() {
@@ -76,13 +70,13 @@ void setRelay() {
     Serial.println("Set OFF");
     return;
   }
-  if(currFlorTemp < (setTemp - 0.3) && currAirTemp < (setTemp - 0.3)) {
+  if(currAirTemp < (setTemp - 0.3)) {
     if(!digitalRead(relayPin)) {
       lastSwitch = millis();
       digitalWrite(relayPin, 1);
       Serial.println("Set ON");
     }
-  } else if(currFlorTemp > (setTemp + 0.3) || currAirTemp > (setTemp + 0.3)) {
+  } else if(currAirTemp > (setTemp + 0.3)) {
     if(digitalRead(relayPin)) {
       lastSwitch = millis();
       digitalWrite(relayPin, 0);
@@ -102,9 +96,7 @@ void loop() {
 
   sensors.requestTemperatures();
   currAirTemp = sensors.getTempC(airThermometer);
-  currFlorTemp = sensors.getTempC(florThermometer);
   Serial.println("currAirTemp=" + String(currAirTemp));
-  Serial.println("currFlorTemp=" + String(currFlorTemp));
 
 
   digitalWrite(ledPin, !digitalRead(ledPin));
@@ -126,7 +118,6 @@ void loop() {
     Serial.println("[HTTP] start...");
     String url = "http://iot.lyolek.dp.ua/services/device.php?";
     url += "GPIO01=" + String(currAirTemp) + "&";
-    url += "GPIO03=" + String(currFlorTemp) + "&";
     url += "GPIO100=" + String(digitalRead(relayPin));
     Serial.println(url);
     http.begin(url);
@@ -150,7 +141,7 @@ void loop() {
       setTemp = parsed["GPIO12"];
       Serial.printf("GPIO12=%d\n", setTemp);
       setRelay();
-      digitalWrite(ledPin, 0);
+      digitalWrite(ledPin, 1);
     } else {
         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
         setDefaultPortValues();

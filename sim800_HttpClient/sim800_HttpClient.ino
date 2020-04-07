@@ -27,11 +27,19 @@
 #include <TinyGsmClient.h>
 #include <SoftwareSerial.h>
 #include <ArduinoHttpClient.h>
-#include "SSD1306.h"
-#include <ESP8266WiFi.h>
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 
-SSD1306  display(0x3c, 12, 13);
+#define OLED_MOSI   9
+#define OLED_CLK   10
+#define OLED_DC    11
+#define OLED_CS    12
+#define OLED_RESET 13
+Adafruit_SSD1306 display(OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
+//Adafruit_SSD1306 display();
+
 SoftwareSerial SerialAT(5, 4); // RX, TX
 
 
@@ -64,7 +72,7 @@ void setup() {
   // Set console baud rate
   Serial.begin(19200);
 
-  display.init();
+  display.begin(SSD1306_SWITCHCAPVCC);
 
 
   // Set GSM module baud rate
@@ -87,7 +95,6 @@ void setup() {
   //  pinMode(12, INPUT_PULLUP);
   setDefaultPortValues();
 
-  WiFi.mode(WIFI_STA);
 }
 
 void restartModem() {
@@ -130,8 +137,8 @@ void handleError() {
   cntFailConst++;
 
   setDefaultPortValues();
-  Serial.printf("cntFail=%d\n", cntFail);
-  Serial.printf("cntFailConst=%d\n", cntFailConst);
+  Serial.println("cntFail=");
+  Serial.println("cntFailConst=");
   if (cntFailConst < 5
      ) {
     //    if(isGprsConnected){
@@ -148,7 +155,7 @@ void handleError() {
 }
 
 void loop() {
-  Serial.println(F("loop()"));
+  Serial.println("loop()");
 
   //  display.clear();
   //  display.display();

@@ -46,7 +46,7 @@ void setup() {
   pinMode(ledNet, OUTPUT);
   digitalWrite(relay, 0);
   digitalWrite(ledNet, 1);
-  attachInterrupt(button, buttonPress, FALLING);
+  attachInterrupt(button, , HIGH);
   sei();
 }
 

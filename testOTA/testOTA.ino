@@ -25,6 +25,8 @@ void setup() {
 
 
   String hostName = "esp8266:";
+
+  
   hostName += usr;
   ArduinoOTA.setHostname(hostName.c_str());
 
@@ -49,28 +51,10 @@ void setup() {
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-
-  
-  pinMode(16, OUTPUT);
-  pinMode(13, OUTPUT);
-  pinMode(5, INPUT_PULLUP);
-  valweSet(0);
-}
-
-void valweSet(int state) {
-  
-  Serial.printf("valweSet(%d)\n", state);
-  Serial.printf("currentValweState =  %d \n", currentValweState);
-
-  Serial.write(0xA0);
-  Serial.write(0x04);
-  Serial.write(state == 1 ? 0x06 : 0x05);
-  Serial.write(0xA1);
-  Serial.flush();
 }
 
 void loop() {
-
-  delay(5000);
+Serial.println("loop");
+  delay(1000);
   ArduinoOTA.handle();
 }
